@@ -49,6 +49,7 @@ int main(int argc, char **argv)
     if(argc < 2 || argc > 3)
     {
         std::cout << "Usage: convert2binary <filename>" << std::endl;
+        std::cout << std::hex << 12 <<std::endl;
         return -1;
     }
     else if(argc == 3 && (std::string(argv[2]) == "-c" || std::string(argv[2]) == "-C"))
@@ -73,6 +74,7 @@ int main(int argc, char **argv)
     if(!console_output)
         output.open(file_name);
 
+    unsigned int passed_bytes = 0;
     for(int j = 0; j < lines.size(); ++j)
     {
         if(!console_output)
@@ -107,10 +109,22 @@ int main(int argc, char **argv)
             ss << ' ';
             binary_string = ss.str();
 
+            std::stringstream hex_stream;
+            hex_stream << std::hex << passed_bytes;
+            std::string hex_string = hex_stream.str();
+            unsigned int hex_length = hex_string.length();
+            while(hex_length != 8 && hex_length < 9)
+            {
+                hex_string.insert(0,1, '0');
+                ++hex_length;
+            }
+
+
             if(!console_output)
-                output << binary_string << ss2.str() << std::endl;
+                output << hex_string << ":  " << binary_string << ss2.str() << std::endl;
             else
                 std::cout << binary_string << ss2.str() << std::endl;
+            passed_bytes += 6;
         }
     }
     output.close();
