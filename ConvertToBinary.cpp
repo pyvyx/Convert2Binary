@@ -63,10 +63,10 @@ int main(int argc, char **argv)
     std::ifstream input(argv[1]);
     std::string c_line;
     std::vector<std::string> lines;
+
     while(std::getline(input, c_line))
-    {
         lines.push_back(c_line);
-    }
+
     input.close();
 
 
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
             char one;
             std::bitset<8> bit_line; 
 
-            for(int k = 0; k < BYTES_PER_LINE_M; k++)
+            for(int k = 0; k < BYTES_PER_LINE_M; ++k)
             {
                 bit_line = std::bitset<8>(lines[j].c_str()[i]);
                 binary_string = bit_line.to_string();
@@ -124,7 +124,7 @@ int main(int argc, char **argv)
                 output << hex_string << ":  " << binary_string << ss2.str() << std::endl;
             else
                 std::cout << binary_string << ss2.str() << std::endl;
-            passed_bytes += 6;
+            passed_bytes += BYTES_PER_LINE_M;
         }
     }
     output.close();
