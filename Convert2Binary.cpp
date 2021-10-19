@@ -59,6 +59,8 @@ char BinaryStringToText(const std::string& binaryString) {
 
 int main(int argc, char **argv)
 {
+    clock_t begin = clock();
+
     unsigned char BYTES_PER_LINE_M = 6;
     bool console_output = false;
     std::string file_name;
@@ -68,8 +70,23 @@ int main(int argc, char **argv)
         std::cout << "Usage: c2b <filename>" << std::endl;
         return -1;
     }
+    else if(argc == 2 && (std::string(argv[1]) == "--help" || std::string(argv[1]) == "-h"))
+    {
+        std::cout << "Usage: c2b <filename>\n";
+        std::cout << "       c2b <filename> <options>" << "\n";
+        std::cout << "       c2b <filename> <filename> <options> : for output in specific file" << "\n";
+        std::cout << "  Options:" << "\n";
+        std::cout << "          -c          : for console output" << "\n";
+        std::cout << "          -n <number> : to change the number of byte blocks per line" << "\n";
+        std::cout << "  Both options can be combined, but if they are combined the" << "\n";
+        std::cout << "  -c options has to be used before the -n one" << "\n";
+        return -1;
+    }
     else if(argc == 3 && (std::string(argv[2]) == "-c" || std::string(argv[2]) == "-C"))
+    {
         console_output = true;
+    }
+
     else if(argc == 3)
         file_name = std::string(argv[2]);
     else
@@ -86,7 +103,7 @@ int main(int argc, char **argv)
             return -1;
         }
     }
-    else if(argc > 2 && (std::string(argv[2]) == "-c" || std::string(argv[2]) == "-C") && (std::string(argv[3]) == "-n" || std::string(argv[3]) == "-N"))
+    else if(argc == 4 && (std::string(argv[2]) == "-c" || std::string(argv[2]) == "-C") && (std::string(argv[3]) == "-n" || std::string(argv[3]) == "-N"))
     {
        try {
             BYTES_PER_LINE_M = std::stoi(argv[4]);
@@ -98,10 +115,10 @@ int main(int argc, char **argv)
         } 
     }
 
-    
+
     std::ifstream input(argv[1], std::ios::binary);
     if(!input) {
-        std::cout << "Couldn't open file\n";
+        std::cout << "Couldn't open the file\n";
         input.close();
         return -1;
     }
@@ -192,8 +209,12 @@ int main(int argc, char **argv)
         }
         ++line_counter_T;
     }
+    
     output.close();
-    std::cout << "Lines: " << DecToHex(line_counter, 0) << " [" << line_counter << "]" << "\n";
+    std::cout << "\nLines: " << DecToHex(line_counter, 0) << " [" << line_counter << "]" << "\n";
 
+    clock_t end = clock();
+    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    std::cout << "Time Spent: " << time_spent << "\n";
     return 0;
 }
