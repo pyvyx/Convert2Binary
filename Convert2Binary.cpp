@@ -5,7 +5,23 @@
 #include <fstream>
 #include <cmath>
 
-#define BYTES_PER_LINE_M 6
+//#define BYTES_PER_LINE_M 6
+
+
+std::string DecToHex(const unsigned int& decimal_number, const unsigned int& length_G)
+{
+    std::stringstream hex_stream;
+    hex_stream << std::hex << decimal_number;
+    std::string hex_string = hex_stream.str();
+    unsigned int hex_length = hex_string.length();
+    while(hex_length != length_G && hex_length < length_G+1)
+    {
+        hex_string.insert(0,1, '0');
+        ++hex_length;
+    }
+
+    return hex_string;
+}
 
 
 int convert(int& n) {
@@ -43,12 +59,13 @@ char BinaryStringToText(const std::string& binaryString) {
 
 int main(int argc, char **argv)
 {
+    unsigned char BYTES_PER_LINE_M = 6;
     bool console_output = false;
     std::string file_name;
 
-    if(argc < 2 || argc > 3)
+    if(argc < 2 || argc > 5)
     {
-        std::cout << "Usage: convert2binary <filename>" << std::endl;
+        std::cout << "Usage: c2b <filename>" << std::endl;
         return -1;
     }
     else if(argc == 3 && (std::string(argv[2]) == "-c" || std::string(argv[2]) == "-C"))
@@ -59,13 +76,46 @@ int main(int argc, char **argv)
         file_name = std::string(argv[1]) + "-Binary.txt";
 
 
-    std::ifstream input(argv[1]);
+    if(argc > 2 && (std::string(argv[2]) == "-n" || std::string(argv[2]) == "-N"))
+    {
+        try {
+            BYTES_PER_LINE_M = std::stoi(argv[3]);
+        }
+        catch (...){
+            std::cout << "No valid integer input\n";
+            return -1;
+        }
+    }
+    else if(argc > 2 && (std::string(argv[2]) == "-c" || std::string(argv[2]) == "-C") && (std::string(argv[3]) == "-n" || std::string(argv[3]) == "-N"))
+    {
+       try {
+            BYTES_PER_LINE_M = std::stoi(argv[4]);
+            console_output = true;
+        }
+        catch (...){
+            std::cout << "No valid integer input\n";
+            return -1;
+        } 
+    }
+
+    
+    std::ifstream input(argv[1], std::ios::binary);
+    if(!input) {
+        std::cout << "Couldn't open file\n";
+        input.close();
+        return -1;
+    }
+
     std::string c_line;
     std::vector<std::string> lines;
-
+    unsigned int line_counter = line_counter ^ line_counter;
     while(std::getline(input, c_line))
+    {
         lines.push_back(c_line);
+        ++line_counter;
+    }
 
+    //std::cout << "Lines: " << DecToHex(line_counter, 0) << " [" << line_counter << "]" << "\n";
     input.close();
 
 
@@ -74,12 +124,25 @@ int main(int argc, char **argv)
         output.open(file_name);
 
     unsigned int passed_bytes = 0;
+    unsigned int line_counter_T = line_counter_T ^ line_counter_T;
     for(int j = 0; j < lines.size(); ++j)
     {
+        std::string line_hex = DecToHex(line_counter_T, 8);
+
         if(!console_output)
-            output << lines[j] << std::endl;
+        {
+            if(lines[j].back() == 13)
+                output << "    " << line_hex << ":  " << lines[j];
+            else
+                output << "    " << line_hex << ":  " << lines[j] << '\n';
+        }
         else
-            std::cout << lines[j] << std::endl;
+        {
+            if(lines[j].back() == 13)
+                std::cout << "    " << line_hex << ":  " << lines[j];
+            else
+                std::cout << "    " << line_hex << ":  " << lines[j] << '\n';
+        }
 
         for(std::size_t i = 0; i < lines[j].size(); ++i)
         {
@@ -108,15 +171,17 @@ int main(int argc, char **argv)
             ss << ' ';
             binary_string = ss.str();
 
-            std::stringstream hex_stream;
-            hex_stream << std::hex << passed_bytes;
-            std::string hex_string = hex_stream.str();
-            unsigned int hex_length = hex_string.length();
-            while(hex_length != 8 && hex_length < 9)
-            {
-                hex_string.insert(0,1, '0');
-                ++hex_length;
-            }
+            // store line count as hex number
+            //std::stringstream hex_stream;
+            //hex_stream << std::hex << passed_bytes;
+            //std::string hex_string = hex_stream.str();
+            //unsigned int hex_length = hex_string.length();
+            //while(hex_length != 8 && hex_length < 9)
+            //{
+            //    hex_string.insert(0,1, '0');
+            //    ++hex_length;
+            //}
+            std::string hex_string = DecToHex(passed_bytes, 8);
 
 
             if(!console_output)
@@ -125,8 +190,10 @@ int main(int argc, char **argv)
                 std::cout << hex_string << ":  " << binary_string << ss2.str() << "\n";
             passed_bytes += BYTES_PER_LINE_M;
         }
+        ++line_counter_T;
     }
     output.close();
+    std::cout << "Lines: " << DecToHex(line_counter, 0) << " [" << line_counter << "]" << "\n";
 
     return 0;
 }
