@@ -127,12 +127,15 @@ int main(int argc, char **argv)
     std::vector<std::string> lines;
     unsigned int line_counter = line_counter ^ line_counter;
     while(std::getline(input, c_line))
-    {
-        lines.push_back(c_line);
         ++line_counter;
-    }
 
-    //std::cout << "Lines: " << DecToHex(line_counter, 0) << " [" << line_counter << "]" << "\n";
+    input.clear();
+    input.seekg(0, input.beg);
+    lines.reserve(line_counter);
+
+    while(std::getline(input, c_line))
+        lines.emplace_back(c_line);
+
     input.close();
 
 
@@ -142,6 +145,8 @@ int main(int argc, char **argv)
 
     unsigned int passed_bytes = 0;
     unsigned int line_counter_T = line_counter_T ^ line_counter_T;
+
+
     for(int j = 0; j < lines.size(); ++j)
     {
         std::string line_hex = DecToHex(line_counter_T, 8);
@@ -181,6 +186,7 @@ int main(int argc, char **argv)
 
                 ss << binary_string << ' ';
                 ss2 << one;
+                bit_line.reset();
                 if(k != BYTES_PER_LINE_M - 1)
                     ++i;
             }
@@ -188,18 +194,7 @@ int main(int argc, char **argv)
             ss << ' ';
             binary_string = ss.str();
 
-            // store line count as hex number
-            //std::stringstream hex_stream;
-            //hex_stream << std::hex << passed_bytes;
-            //std::string hex_string = hex_stream.str();
-            //unsigned int hex_length = hex_string.length();
-            //while(hex_length != 8 && hex_length < 9)
-            //{
-            //    hex_string.insert(0,1, '0');
-            //    ++hex_length;
-            //}
             std::string hex_string = DecToHex(passed_bytes, 8);
-
 
             if(!console_output)
                 output << hex_string << ":  " << binary_string << ss2.str() << "\n";
