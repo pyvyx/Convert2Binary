@@ -5,7 +5,6 @@
 #include <fstream>
 #include <cmath>
 #include <string>
-#include <array>
 
 
 #define DEBUG 0
